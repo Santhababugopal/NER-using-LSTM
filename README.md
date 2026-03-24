@@ -55,25 +55,24 @@ Display predictions or plot loss curves.
 ### Name:SANTHABABU G
 ### Register Number:212224040292
 ```
-class BiLSTMTagger(nn.Module):
-    def __init__(self, vocab_size, tagset_size, embedding_dim=100, hidden_dim=256):
-        super(BiLSTMTagger, self).__init__()
+class BiLSTM(nn.Module):
+  def __init__(self, vocab_size,tagset_size, embedding_dim=50, hidden_dim=100):
+    super(BiLSTM,self).__init__()
+    self.embedding=nn.Embedding(vocab_size,embedding_dim)
+    self.dropout=nn.Dropout(0.1)
+    self.lstm=nn.LSTM(embedding_dim,hidden_dim,batch_first=True,bidirectional=True)
+    self.fc=nn.Linear(hidden_dim*2,tagset_size)
 
-        self.hidden_dim = hidden_dim
-        self.embedding_dim = embedding_dim
-        self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, bidirectional=True, batch_first=True)
-        self.hidden2tag = nn.Linear(hidden_dim * 2, tagset_size)
-
-    def forward(self, input_ids):
-        embeddings = self.word_embeddings(input_ids)
-        lstm_out, _ = self.lstm(embeddings)
-        tag_space = self.hidden2tag(lstm_out)
-        return tag_space
+  def forward(self, input_ids):
+      x = self.embedding(input_ids)
+      x = self.dropout(x)
+      x, _ = self.lstm(x)
+      return self.fc(x)
 
 
-model = BiLSTMTagger(len(words) + 1, len(tags)).to(device)
-loss_fn = nn.CrossEntropyLoss(ignore_index=tag2idx["O"])
+
+model =BiLSTM(len(word2idx)+1,len(tag2idx)).to(device)
+criterion =nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
@@ -114,12 +113,12 @@ def train_model(model, train_loader, test_loader, loss_fn, optimizer, epochs=3):
 ### Training Loss, Validation Loss Vs Iteration Plot
 
 
-<img width="847" height="584" alt="image" src="https://github.com/user-attachments/assets/1ddb8ec6-c7fd-4919-adc5-97cf77dc43c4" />
+<img width="780" height="582" alt="image" src="https://github.com/user-attachments/assets/d44f2514-f3a2-4f47-84df-dda405ff42c4" />
 
 
 ### Sample Text Prediction
 
-<img width="471" height="523" alt="image" src="https://github.com/user-attachments/assets/c06272fd-587e-43cf-8c9a-e1b9a4db757e" />
+<img width="395" height="436" alt="image" src="https://github.com/user-attachments/assets/be79d834-7aef-41bd-9105-03c69636dfcf" />
 
 ## RESULT
 
